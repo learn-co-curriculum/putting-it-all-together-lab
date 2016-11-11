@@ -80,6 +80,7 @@ describe('Blackjack:', function(){
     store = createStore(blackjackReducer)
   })
 
+
   describe('`fetchDeck()`', function(){
     it('is defined in actions', function(){
       expect(fetchDeck).toExist('fetchDeck action is not defined')
@@ -100,40 +101,40 @@ describe('Blackjack:', function(){
   describe('`setAICards()`', function(){
     it('is defined in actions', function(){
       expect(setAICards).toExist('setAICards action is not defined')
-      store.dispatch(setAICards(store.getState()))
+      store.dispatch(setAICards())
     })
 
     it('is an action function that sets the AI cards at random through the reducer', function(){
       expect(setAICards).toBeA('function', '`setAICards()` is not a function')
-      expect(setAICards(store.getState()).payload.aiCards).toBeA('array', 'payload from `setAICards()` action should include aiCards array')
-      expect(setAICards(deck).payload.aiCards.length).toEqual(2, 'payload from `setAICards()` action should return updated aiCards array with two new card objects')
+      // expect(setAICards(store.getState()).payload.aiCards).toBeA('array', 'payload from `setAICards()` action should include aiCards array')
+      // expect(setAICards(deck).payload.aiCards.length).toEqual(2, 'payload from `setAICards()` action should return updated aiCards array with two new card objects')
       expect(store.getState().aiCards.length).toEqual(2, 'did not properly set the aiCards - hint: deepclone object in setAICards()')
     })
 
     it('removes those two cards from the deck', function(){
-      const testSetAICards = setAICards(deck)
-      expect(testSetAICards.payload.deck.length).toEqual(50, 'does not remove 2 cards from deck')
-      expect(testSetAICards.payload.deck).toExclude(testSetAICards.payload.aiCards[0] && testSetAICards.payload.aiCards[1], 'does not remove the proper cards from the deck')
+      const stateAfterSetAICards = store.getState()
+      expect(stateAfterSetAICards.deck.length).toEqual(50, 'does not remove 2 cards from deck')
+     // expect(testSetAICards.payload.deck).toExclude(testSetAICards.payload.aiCards[0] && testSetAICards.payload.aiCards[1], 'does not remove the proper cards from the deck')
     })
   })
 
   describe('`setUserCards()`', function(){
     it('is defined in actions', function(){
       expect(setUserCards).toExist('setUserCards action is not defined')
-      store.dispatch(setUserCards(store.getState()))
+      store.dispatch({type: 'RESET_GAME'})
+      store.dispatch(setUserCards())
     })
 
     it('is an action function that sets the User cards at random through the reducer', function(){
       expect(setUserCards).toBeA('function', '`setUserCards()` is not a function')
-      expect(setUserCards(store.getState()).payload.userCards).toBeA('array', 'payload from `setUserCards()` action should include userCards array')
-      expect(setUserCards(deck).payload.userCards.length).toEqual(2, 'payload from `setUserCards()` action should return updated userCards array with two new card objects')
+      // expect(setUserCards(store.getState()).payload.userCards).toBeA('array', 'payload from `setUserCards()` action should include userCards array')
+      // expect(setUserCards(deck).payload.userCards.length).toEqual(2, 'payload from `setUserCards()` action should return updated userCards array with two new card objects')
       expect(store.getState().userCards.length).toEqual(2, 'did not properly set the userCards - hint: deepclone object in setUserCards()')
     })
 
     it('removes those two cards from the deck', function(){
-      const testSetAICards = setUserCards(deck)
-      expect(testSetAICards.payload.deck.length).toEqual(50, 'does not remove 2 cards from deck')
-      expect(testSetAICards.payload.deck).toExclude(testSetAICards.payload.userCards[0] && testSetAICards.payload.userCards[1], 'does not remove the proper cards from the deck')
+      const stateAfterSetUserCards = store.getState()
+      expect(stateAfterSetUserCards.deck.length).toEqual(50, 'does not remove 2 cards from deck')
     })
   })
 
@@ -195,88 +196,95 @@ describe('Blackjack:', function(){
 
     before(function(){
       expect(AIBlackjack).toExist('<AIBlackjack /> not mounted')
-      wrapper = mount(<AIBlackjack store={store} score={function(){}}/>)
-      component = shallow(<AIBlackjack store={store} score={function(){}}/>)
+      const twoCards = [{name:"Ace of Diamonds", value: 1},{name:"Ace of Spades", value: 1}]
+      wrapper = mount(<AIBlackjack score={2} cards={twoCards}/>)
+      component = shallow(<AIBlackjack score={2} cards={twoCards}/>)
     })
 
     it('should be a functional component', function(){
       expect(React.Component.isPrototypeOf(AIBlackjack)).toEqual(false, '`<AIBlackjack />` should be a functional component')
     })
 
-    it('should have access to the store', function(){
-      expect(wrapper.props().store).toExist('cannot access the store as a prop')
-    })
+    // it('should have access to the store', function(){
+    //   expect(wrapper.props().store).toExist('cannot access the store as a prop')
+    // })
 
     it('should have "Computer" as a `h1` tag', function(){
       expect(component.find('h1').text()).toEqual('Computer', 'cannot find `h1` with "Computer"')
     })
 
     it('should have "Score: " as a `h2` tag', function(){
-      expect(component.find('h2').text()).toEqual('Score: ', 'cannot find `h2` with "Score"')
+      expect(component.find('h2').text()).toEqual('Score: 2', 'cannot find `h2` with "Score"')
     })
 
     it("should list out each of AI's cards as `li` inside `ul`", function(){
       expect(wrapper.find('ul').is('ul')).toEqual(true, 'does not have a `ul` tag')
       expect(wrapper.find('li').length).toEqual(2, 'does not render each card as separate `li`')
-      expect(wrapper.find('ul').text()).toEqual(wrapper.props().store.getState().aiCards.reduce((prev, curr)=> {return prev + curr.name}, ''), 'does not properly list out AI cards from state')
     })
 
   })
 
   describe('<UserBlackjack />', function(){
-    let container
+    store = createStore(blackjackReducer)
+
+    let container = shallow(<App store={store}/>)
+    const twoCards = [{name:"Ace of Diamonds", value: 1},{name:"Ace of Spades", value: 1}]
 
     before(function(){
       expect(UserBlackjack).toExist('<UserBlackjack /> not mounted')
-      container = mount(<App store={store} />)
+      // store = createStore(blackjackReducer)
+      // container = mount(<App store={store} />)
+
     })
 
-    it('should be a class component', function(){
-      expect(React.Component.isPrototypeOf(UserBlackjack)).toEqual(true, '`<UserBlackjack />` should be a functional component')
-    })
+    // it('should be a class component', function(){
+    //   expect(React.Component.isPrototypeOf(UserBlackjack)).toEqual(true, '`<UserBlackjack />` should be a functional component')
+    // })
 
-    it('should have access to the store', function(){
-      const wrapper = mount(<UserBlackjack store={store} score={function(){}}/>)
-      expect(wrapper.props().store).toExist('cannot access the store as a prop')
-    })
+    // it('should have access to the store', function(){
+    //   const wrapper = mount(<UserBlackjack store={store} score={function(){}}/>)
+    //   expect(wrapper.props().store).toExist('cannot access the store as a prop')
+    // })
 
     it('should have "Player1" as a `h1` tag', function(){
-      const component = shallow(<UserBlackjack store={store} score={function(){}}/>)
+      const component = shallow(<UserBlackjack score={2} cards={twoCards} hitMe={function(){}}/>)
       expect(component.find('h1').text()).toEqual('Player1', 'cannot find `h1` with "Player1"')
     })
 
     it('should have "Score: " as a `h2` tag', function(){
-      const component = shallow(<UserBlackjack store={store} score={function(){}}/>)
-      expect(component.find('h2').text()).toEqual('Score: ', 'cannot find `h2` with "Score"')
+      const component = shallow(<UserBlackjack score={2} cards={twoCards} hitMe={function(){}}/>)
+      expect(component.find('h2').text()).toEqual('Score: 2', 'cannot find `h2` with "Score"')
     })
 
     it("should list out each of User's cards as `li` inside `ul`", function(){
-      const wrapper = mount(<UserBlackjack store={store} score={function(){}}/>)
+      const wrapper = shallow(<UserBlackjack score={2} cards={twoCards} hitMe={function(){}}/>)
       expect(wrapper.find('ul').is('ul')).toEqual(true, 'does not have a `ul` tag')
       expect(wrapper.find('li').length).toEqual(2, 'does not render each card as separate `li`')
-      expect(wrapper.find('ul').text()).toEqual(wrapper.props().store.getState().userCards.reduce((prev, curr)=> {return prev + curr.name}, ''), 'does not properly list out User cards from state')
     })
 
-    it("should have a 'Hit Me' `button` within a `form`", function(){
-      const wrapper = mount(<UserBlackjack store={store} score={function(){}}/>)
-      expect(wrapper.find('form').findWhere(n=>n.text() === " Hit Me ").nodes[1].type).toEqual('submit', 'does not have a "Hit Me" submit `button` tag')
+    it("should have a 'Hit Me' `button` within a class of 'hit-me'", function(){
+      const wrapper = shallow(<UserBlackjack score={2} cards={twoCards} hitMe={function(){}}/>)
+      
+      expect(wrapper.find('.hit-me').is('button')).toEqual(true, 'does not have a "Hit Me" button with a class of "hit-me"')
     })
 
-    it("should have an onSubmit event on the 'Hit Me' `button` `form` that calls the `hitMe()` function from parent component", function(){
-      const onButtonClick = createSpy()
-      const wrapper = mount(<UserBlackjack store={store} score={function(){}} hitMe={onButtonClick}/>)
-      wrapper.find('form').at(0).simulate('submit')
-      expect(onButtonClick.calls.length).toEqual(1, 'does not call `hitMe` function')
+    it("should have an onClick event on the 'Hit Me' `button` that calls the `hitMe()` function from parent component", function(){
+      const onButtonClick = createSpy(container.node.hitMe)
+      const wrapper = shallow(<UserBlackjack score={2} cards={twoCards} hitMe={onButtonClick}/>)
+      wrapper.find('.hit-me').simulate('click')
+      expect(onButtonClick.calls.length).toEqual(1, 'does not call App components `hitMe` function')
     })
 
     it("should display new user card and re-tally score when user clicks 'Hit Me'", function(){
-      const wrapper = mount(<UserBlackjack store={store} score={container.node.calculateUserScore} hitMe={container.node.hitMe}/>)
-      let userCards = wrapper.props().store.getState().userCards
-      wrapper.find('form').at(0).simulate('submit')
-      const wrapper2 = mount(<UserBlackjack store={store} score={container.node.calculateUserScore} hitMe={container.node.hitMe}/>)
+      store = createStore(blackjackReducer)
+      const appComponent = mount(<App store={store} />)
+      const wrapper = shallow(<UserBlackjack cards={twoCards} score={appComponent.node.calculateUserScore()} hitMe={appComponent.node.hitMe.bind(appComponent)}/>)
+      let userCards = appComponent.props().store.getState().userCards
+      wrapper.find('.hit-me').simulate('click')
+      const wrapper2 = mount(<UserBlackjack cards={userCards} score={appComponent.node.calculateUserScore} hitMe={appComponent.node.hitMe}/>)
       let userScore = userCards.reduce((prevCard, currCard) => {return prevCard + currCard.value}, 0)
       let userScoreShow = userScore > 21 ? "BUST" : userScore
-      expect(wrapper2.find('ul').text()).toEqual(wrapper2.props().store.getState().userCards.reduce((prev, curr)=> {return prev + curr.name}, ''), 'does not render new card to page')
+      expect(wrapper2.find('ul').text()).toEqual(wrapper2.props().cards.reduce((prev, curr)=> {return prev + curr.name}, ''), 'does not render new card to page')
       expect(wrapper2.find('h2').text()).toInclude(userScoreShow, 'does not show the right score')
     })
 
