@@ -11,6 +11,8 @@ Build out a functional blackjack game with all that we've learned about React, F
 ## Resources
 
 [Stack Overflow on Deep Clone](http://stackoverflow.com/questions/728360/how-do-i-correctly-clone-a-javascript-object#answer-10869248)
+[Spread syntax (MDN)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_operator)
+[Using Object Spread Operator](http://redux.js.org/docs/recipes/UsingObjectSpreadOperator.html)
 
 # Putting it all together - Blackjack
 
@@ -205,3 +207,5 @@ The `stay` method should determine whether or not there is a winner. To do so th
 * The computer wins if they have a point total that is greater than the User's, but less than or equal to 21, after `stay` is clicked.
 
 **Note:** Remember to wrap your `ReactDOM.render` function in a `render` method that then subscribes to the `store.subscribe` function.
+
+<p class='util--hide'>View <a href='https://learn.co/lessons/putting-it-all-together-lab'>Putting It All Together Lab</a> on Learn.co and start learning to code for free.</p>
